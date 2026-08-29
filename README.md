@@ -3,9 +3,8 @@
 A lightweight desktop application that locks your keyboard to safely clean it without accidental keystrokes.
 
 ## Preview
-| Unlocked State | Locked State |
-| :---: | :---: |
-| ![Unlocked](preview-normal.png) | ![Locked](preview-locked.png) |
+![Unlocked](preview-normal.png)
+![Locked](preview-locked.png)
 
 ## Features
 - Locks all keyboard inputs instantly.
