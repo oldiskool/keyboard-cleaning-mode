@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard Cleaning Mode</title>
+    <style>
+        /* Bahnschrift Font Tanımlaması */
+        @font-face {
+            font-family: 'Bahnschrift';
+            src: local('Bahnschrift'), local('Bahnschrift SemiBold'), local('Bahnschrift Bold');
+            font-weight: bold;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #0d1117;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #d1d5db;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Göz Yormayan, Yavaş ve Net Renk Geçiş Döngüsü */
+        @keyframes smoothGradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Ana Pencere Kutusu */
+        .app-window {
+            width: 1160px;
+            background-color: #121519;
+            border: 1px solid #2a2f38;
+            border-radius: 12px;
+            padding: 18px 32px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            position: relative;
+        }
+
+        /* Sağ Üst Dil Seçenekleri */
+        .lang-switcher {
+            position: absolute;
+            top: 18px;
+            right: 32px;
+            display: flex;
+            gap: 6px;
+        }
+
+        .lang-btn {
+            background-color: #161b22;
+            border: 1px solid #21262d;
+            color: #8b949e;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 3px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        /* Aktif dil butonunun metnine başlıkla birebir aynı degrade efekti */
+        .lang-btn:hover, .lang-btn.active {
+            background-color: #21262d;
+            border-color: #30363d;
+            color: transparent;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(270deg, #28F19B, #02A3F8, #F15D29, #F8022A, #28F19B, #02A3F8);
+            background-size: 400% 400%;
+            animation: smoothGradient 14s ease infinite;
+        }
+
+        /* Üst Başlık ve Açıklama */
+        .header-section {
+            text-align: center;
+            padding-right: 120px;
+            padding-left: 120px;
+        }
+
+        .app-title {
+            font-family: 'Bahnschrift', sans-serif;
+            font-weight: bold;
+            background: linear-gradient(270deg, #28F19B, #02A3F8, #F15D29, #F8022A, #28F19B, #02A3F8);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: smoothGradient 14s ease infinite;
+            font-size: 1.95rem;
+            margin-bottom: 2px;
+            letter-spacing: -0.8px;
+        }
+
+        .app-desc {
+            font-size: 0.84rem;
+            color: #8b949e;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.35;
+        }
+
+        /* 3 Sütunlu Simetrik İçerik Alanı */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            align-items: stretch;
+        }
+
+        .card {
+            background-color: #161b22;
+            border: 1px solid #21262d;
+            border-radius: 8px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .card-title {
+            color: #ffffff;
+            font-size: 0.88rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-title::before {
+            content: "";
+            display: inline-block;
+            width: 3px;
+            height: 12px;
+            background: linear-gradient(270deg, #28F19B, #02A3F8, #F15D29, #F8022A, #28F19B, #02A3F8);
+            background-size: 400% 400%;
+            animation: smoothGradient 14s ease infinite;
+            border-radius: 2px;
+        }
+
+        .card ul {
+            padding-left: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            list-style-type: disc;
+        }
+
+        .card li {
+            font-size: 0.76rem;
+            line-height: 1.35;
+            color: #c9d1d9;
+        }
+
+        /* Önizleme Alanı */
+        .preview-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .preview-box {
+            background-color: #090c10;
+            border: 1px solid #21262d;
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-box img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+
+        /* Alt Kısım: İndirme Butonu ve Telif */
+        .footer-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .action-button {
+            font-family: 'Bahnschrift', sans-serif;
+            font-weight: bold;
+            display: block;
+            width: 100%;
+            background: linear-gradient(270deg, #28F19B, #02A3F8, #F15D29, #F8022A, #28F19B, #02A3F8);
+            background-size: 400% 400%;
+            animation: smoothGradient 14s ease infinite;
+            color: #ffffff;
+            border: none;
+            padding: 11px;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(40, 241, 155, 0.2);
+            transition: opacity 0.2s ease;
+        }
+
+        .action-button:hover {
+            opacity: 0.92;
+        }
+
+        .footer-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.76rem;
+            color: #8b949e;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-window">
+        <!-- Sağ Üst Dil Seçenekleri -->
+        <div class="lang-switcher">
+            <button class="lang-btn active" onclick="changeLanguage('en', this)" id="btn-en">EN</button>
+            <button class="lang-btn" onclick="changeLanguage('es', this)" id="btn-es">ES</button>
+            <button class="lang-btn" onclick="changeLanguage('tr', this)" id="btn-tr">TR</button>
+            <button class="lang-btn" onclick="changeLanguage('zh', this)" id="btn-zh">中</button>
+        </div>
+
+        <!-- Başlık -->
+        <div class="header-section">
+            <h1 class="app-title" id="txt-title">Keyboard Cleaning Mode</h1>
+            <p class="app-desc" id="txt-desc">A lightweight desktop application that locks your keyboard to safely clean it without accidental keystrokes.</p>
+        </div>
+
+        <!-- 3 Sütunlu Simetrik İçerik -->
+        <div class="content-grid">
+            <div class="card">
+                <div class="card-title" id="txt-feat-title">Features</div>
+                <ul id="txt-feat-list">
+                    <li>Locks all keyboard inputs instantly.</li>
+                    <li>Prevents accidental typing or shortcut activation while wiping keys.</li>
+                    <li>Simple and easy-to-use interface with multi-language support.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-title" id="txt-use-title">How to Use</div>
+                <ul id="txt-use-list">
+                    <li>Download the program using the button below.</li>
+                    <li>Run the application.</li>
+                    <li>Lock your keyboard and you are ready to go!</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-title" id="txt-note-title">Note</div>
+                <ul id="txt-note-list">
+                    <li>Depending on your keyboard model, dedicated hardware media keys or volume wheels managed by proprietary manufacturer software may still function while the cleaning mode is active.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Önizleme Görselleri -->
+        <div class="preview-container">
+            <div class="preview-box">
+                <img src="preview-normal.png" alt="Preview Normal">
+            </div>
+            <div class="preview-box">
+                <img src="preview-locked.png" alt="Preview Locked">
+            </div>
+        </div>
+
+        <!-- İndirme Butonu ve Alt Bilgi -->
+        <div class="footer-section">
+            <a href="https://github.com/oldiskool/keyboard-cleaning-mode/releases/download/v1.0.0/Keyboard.Cleaning.Mode.exe" class="action-button" id="txt-btn" target="_blank">Download!</a>
+            <div class="footer-info">
+                <span>© 2026 Mert</span>
+                <span>Keyboard Cleaning Mode v1.0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                btnText: "Download!",
+                desc: "A lightweight desktop application that locks your keyboard to safely clean it without accidental keystrokes.",
+                featTitle: "Features",
+                featList: [
+                    "Locks all keyboard inputs instantly.",
+                    "Prevents accidental typing or shortcut activation while wiping keys.",
+                    "Simple and easy-to-use interface with multi-language support."
+                ],
+                useTitle: "How to Use",
+                useList: [
+                    "Download the program using the button below.",
+                    "Run the application.",
+                    "Lock your keyboard and you are ready to go!"
+                ],
+                noteTitle: "Note",
+                noteList: [
+                    "Depending on your keyboard model, dedicated hardware media keys or volume wheels managed by proprietary manufacturer software may still function while the cleaning mode is active."
+                ]
+            },
+            es: {
+                btnText: "¡Descargar!",
+                desc: "Una aplicación de escritorio ligera que bloquea tu teclado para limpiarlo de forma segura sin pulsaciones accidentales.",
+                featTitle: "Características",
+                featList: [
+                    "Bloquea todas las entradas del teclado al instante.",
+                    "Evita la escritura accidental o la activación de atajos al limpiar las teclas.",
+                    "Interfaz sencilla y fácil de usar con soporte multiidioma."
+                ],
+                useTitle: "Cómo Usar",
+                useList: [
+                    "Descarga el programa usando el botón de abajo.",
+                    "Ejecuta la aplicación.",
+                    "¡Bloquea tu teclado y listo!"
+                ],
+                noteTitle: "Nota",
+                noteList: [
+                    "Dependiendo del modelo de tu teclado, las teclas multimedia físicas o ruedas de volumen gestionadas por software propietario del fabricante aún pueden funcionar mientras el modo de limpieza está activo."
+                ]
+            },
+            tr: {
+                btnText: "İndir!",
+                desc: "Klavyenizi yanlış tuş vuruşları olmadan güvenle temizlemeniz için klavyenizi kilitleyen hafif bir masaüstü uygulaması.",
+                featTitle: "Özellikler",
+                featList: [
+                    "Tüm klavye girişlerini anında kilitler.",
+                    "Tuşları silirken yanlışlıkla yazı yazılmasını veya kısayol tetiklenmesini önler.",
+                    "Çoklu dil desteğine sahip, sade ve kolay kullanım arayüzü."
+                ],
+                useTitle: "Nasıl Kullanılır",
+                useList: [
+                    "Aşağıdaki butonu kullanarak programı indirin.",
+                    "Uygulamayı çalıştırın.",
+                    "Klavyenizi kilitleyin ve temizliğe başlayın!"
+                ],
+                noteTitle: "Not",
+                noteList: [
+                    "Klavye modelinize bağlı olarak, üretici yazılımı tarafından yönetilen özel donanımsal medya tuşları veya ses tekerlekleri temizlik modundayken çalışmaya devam edebilir."
+                ]
+            },
+            zh: {
+                btnText: "下载！",
+                desc: "一个轻量级的桌面应用程序，可锁定您的键盘以安全清洁，防止误触按键。",
+                featTitle: "功能特点",
+                featList: [
+                    "瞬间锁定所有键盘输入。",
+                    "在擦拭按键时防止意外输入或触发快捷键。",
+                    "界面简洁易用，支持多语言。"
+                ],
+                useTitle: "如何使用",
+                useList: [
+                    "使用下方按钮下载程序。",
+                    "运行应用程序。",
+                    "锁定键盘即可开始清洁！"
+                ],
+                noteTitle: "注意事项",
+                noteList: [
+                    "根据您的键盘型号，由专有厂商软件管理的专用硬件媒体键或音量滚轮在清洁模式激活时可能仍然有效。"
+                ]
+            }
+        };
+
+        function changeLanguage(lang, element) {
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+
+            const t = translations[lang];
+
+            document.getElementById('txt-btn').innerText = t.btnText;
+            document.getElementById('txt-desc').innerText = t.desc;
+            document.getElementById('txt-feat-title').innerText = t.featTitle;
+            document.getElementById('txt-use-title').innerText = t.useTitle;
+            document.getElementById('txt-note-title').innerText = t.noteTitle;
+
+            updateList('txt-feat-list', t.featList);
+            updateList('txt-use-list', t.useList);
+            updateList('txt-note-list', t.noteList);
+        }
+
+        function updateList(elementId, items) {
+            const ul = document.getElementById(elementId);
+            ul.innerHTML = '';
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.innerText = item;
+                ul.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
